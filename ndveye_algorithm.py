@@ -44,6 +44,7 @@ from qgis.core import (
     QgsVectorLayer,
     QgsFeature
 )
+import os
 import rasterio
 import shapely
 import rasterio
@@ -80,17 +81,10 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         Here we define the inputs and output of the algorithm, along
         with some other properties.
         """
-        
-        # Add input raster field:
-        self.addParameter(
-            QgsProcessingParameterFile(
-                self.INPUT,
-                self.tr("Input raster")
-        ))
 
         self.addParameter(
             QgsProcessingParameterMultipleLayers(
-                "inputIds",
+                "inputRasters",
                 # accept any raster layers:
                 self.tr("Multiple input layers"),   
                 QgsProcessing.TypeRaster,
@@ -109,7 +103,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
 
 
     def processAlgorithm(self, parameters, context, feedback):
-        for index, inputId in enumerate(parameters["inputIds"]):
+        for index, inputId in enumerate(parameters["inputRasters"]):
 
             counter=0
             for _,v in QgsProject.instance().mapLayers().items():
@@ -175,10 +169,15 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                     )
                 )
 
-            gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=f"polygons_{index}", engine="pyogrio")
+            geom = gpd.GeoSeries(shapes).set_crs(3857)
+            gdf = gpd.GeoDataFrame(geometry=geom)
+
+            group=os.path.basename(inputFile).replace(".tif","")
+            gdf["group"]=group
+            gdf.to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=group, engine="pyogrio")
             
             shapes = [each.centroid for each in shapes]
-            gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=f"points_{index}", engine="pyogrio")
+            gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=f"{group}-points", engine="pyogrio")
             
         return {"Found this many": len(shapes),"offset": parameters[self.offset], "parameters":parameters}
 
