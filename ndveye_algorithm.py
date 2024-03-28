@@ -35,6 +35,7 @@ from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
     QgsProcessingParameterRasterLayer,
+    QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterFile,
     QgsProcessingParameterNumber,
     QgsPointXY,
@@ -86,6 +87,16 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 self.INPUT,
                 self.tr("Input raster")
         ))
+
+        self.addParameter(
+            QgsProcessingParameterMultipleLayers(
+                "inputIds",
+                # accept any raster layers:
+                self.tr("Multiple input layers"),   
+                QgsProcessing.TypeRaster,
+                
+            )
+        )
         
         # Add float input parameter field called offset:
         self.addParameter(
@@ -98,69 +109,78 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
 
 
     def processAlgorithm(self, parameters, context, feedback):
-        with rasterio.open(parameters[self.INPUT], "r") as src:
-            data = src.read(1)
-            profile = src.profile
-            bounds = src.bounds
-            
-        rowNum, colNum = data.shape
+        for index, inputId in enumerate(parameters["inputIds"]):
 
-        totalWidth = bounds.right - bounds.left
-        totalHeight = bounds.top - bounds.bottom
+            counter=0
+            for _,v in QgsProject.instance().mapLayers().items():
+                if v.id()==inputId:
+                    inputFile=v.source()
+                    counter+=1
+            assert counter<2, "Multiple layers with the same id found"
+        
+            with rasterio.open(inputFile, "r") as src:
+                data = src.read(1)
+                profile = src.profile
+                bounds = src.bounds
+                
+            rowNum, colNum = data.shape
 
-        pixelWidth = totalWidth / colNum
-        pixelHeight = totalHeight / rowNum
+            totalWidth = bounds.right - bounds.left
+            totalHeight = bounds.top - bounds.bottom
 
-        def pixelcoord_to_epsg3857(row, col):
-            x = bounds.left + (col - 1 / 2) * pixelWidth
-            y = bounds.top - (row - 1 / 2) * pixelHeight
-            return x, y
+            pixelWidth = totalWidth / colNum
+            pixelHeight = totalHeight / rowNum
 
-        def point_to_square(centerx, centery, pixelWidth=pixelWidth, pixelHeight=pixelHeight):
-            return shapely.geometry.Polygon(
-                [
-                    [centerx - pixelWidth / 2, centery - pixelHeight / 2],
-                    [centerx + pixelWidth / 2, centery - pixelHeight / 2],
-                    [centerx + pixelWidth / 2, centery + pixelHeight / 2],
-                    [centerx - pixelWidth / 2, centery + pixelHeight / 2],
-                    [centerx - pixelWidth / 2, centery - pixelHeight / 2],
-                ]
-            )
+            def pixelcoord_to_epsg3857(row, col):
+                x = bounds.left + (col + 1 / 2) * pixelWidth
+                y = bounds.top - (row + 1 / 2) * pixelHeight
+                return x, y
 
-        data -= np.ones(shape=data.shape) * parameters[self.offset]
-
-        kernel = photutils.segmentation.make_2dgaussian_kernel(1.4, size=7)  # FWHM = 3.0
-        convolved_data = astropy.convolution.convolve(data, kernel)
-
-        npixels = 4
-        segment_map = photutils.segmentation.detect_sources(convolved_data, np.ones(shape=data.shape) * 0.08,
-                                                            npixels=npixels, connectivity=4)
-
-        segm_deblend = photutils.segmentation.deblend_sources(convolved_data, segment_map,
-                                                              npixels=npixels, nlevels=500, contrast=0.0001,
-                                                              progress_bar=True)
-
-        shapes = []
-
-        for label in segm_deblend.labels:
-            xs, ys = np.where(np.array(segm_deblend) == label)
-            targetPixels = [[x, y] for (x, y) in zip(xs, ys)]
-
-            shapes.append(
-                shapely.unary_union(
+            def point_to_square(centerx, centery, pixelWidth=pixelWidth, pixelHeight=pixelHeight):
+                return shapely.geometry.Polygon(
                     [
-                        point_to_square(*pixelcoord_to_epsg3857(*each)).buffer(0.001)
-                        for each in targetPixels
+                        [centerx - pixelWidth / 2, centery - pixelHeight / 2],
+                        [centerx + pixelWidth / 2, centery - pixelHeight / 2],
+                        [centerx + pixelWidth / 2, centery + pixelHeight / 2],
+                        [centerx - pixelWidth / 2, centery + pixelHeight / 2],
+                        [centerx - pixelWidth / 2, centery - pixelHeight / 2],
                     ]
                 )
-            )
 
-        gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer="polygons", engine="pyogrio")
-        
-        shapes = [each.centroid for each in shapes]
-        gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer="points", engine="pyogrio")
-        
-        return {"Found this many": len(shapes),"offset": parameters[self.offset]}
+            data -= np.ones(shape=data.shape) * parameters[self.offset]
+
+            kernel = photutils.segmentation.make_2dgaussian_kernel(1.4, size=7)  # FWHM = 3.0
+            convolved_data = astropy.convolution.convolve(data, kernel)
+
+            npixels = 4
+            segment_map = photutils.segmentation.detect_sources(convolved_data, np.ones(shape=data.shape) * 0.08,
+                                                                npixels=npixels, connectivity=4)
+
+            segm_deblend = photutils.segmentation.deblend_sources(convolved_data, segment_map,
+                                                                npixels=npixels, nlevels=500, contrast=0.0001,
+                                                                progress_bar=True)
+
+            shapes = []
+
+            for label in segm_deblend.labels:
+                xs, ys = np.where(np.array(segm_deblend) == label)
+                targetPixels = [[x, y] for (x, y) in zip(xs, ys)]
+
+                shapes.append(
+                    shapely.unary_union(
+                        [
+                            point_to_square(*pixelcoord_to_epsg3857(*each)).buffer(0.001)
+                            for each in targetPixels
+                        ]
+                    )
+                )
+
+            gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=f"polygons_{index}", engine="pyogrio")
+            
+            shapes = [each.centroid for each in shapes]
+            gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=f"points_{index}", engine="pyogrio")
+            
+        return {"Found this many": len(shapes),"offset": parameters[self.offset], "parameters":parameters}
 
     def name(self):
         """
