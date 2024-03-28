@@ -49,6 +49,7 @@ import rasterio
 import shapely
 import rasterio
 import numpy as np
+import pandas as pd
 import geopandas as gpd
 import astropy.convolution
 import photutils.segmentation
@@ -103,6 +104,8 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
 
 
     def processAlgorithm(self, parameters, context, feedback):
+        polygondfs=[]
+        pointdfs=[]
         for index, inputId in enumerate(parameters["inputRasters"]):
 
             counter=0
@@ -168,17 +171,21 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                         ]
                     )
                 )
+            group=os.path.basename(inputFile).replace(".tif","")
 
             geom = gpd.GeoSeries(shapes).set_crs(3857)
             gdf = gpd.GeoDataFrame(geometry=geom)
-
-            group=os.path.basename(inputFile).replace(".tif","")
             gdf["group"]=group
-            gdf.to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=group, engine="pyogrio")
-            
-            shapes = [each.centroid for each in shapes]
-            gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=f"{group}-points", engine="pyogrio")
-            
+            polygondfs.append(gdf)
+        
+            geom = [each.centroid for each in shapes]
+            gdf = gpd.GeoDataFrame(geometry=geom)
+            gdf["group"]=group
+            pointdfs.append(gdf)
+
+        #gdf.to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=group, engine="pyogrio")
+        gpd.GeoDataFrame(pd.concat(polygondfs)).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer="polygons", engine="pyogrio")    
+        gpd.GeoDataFrame(pd.concat(pointdfs)).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer="points", engine="pyogrio")    
         return {"Found this many": len(shapes),"offset": parameters[self.offset], "parameters":parameters}
 
     def name(self):
