@@ -22,13 +22,13 @@
  ***************************************************************************/
 """
 
-__author__ = 'Bator Menyhert Koncz & Pal Szabo'
-__date__ = '2024-03-25'
-__copyright__ = '(C) 2024 by Bator Menyhert Koncz & Pal Szabo'
+__author__ = "Bator Menyhert Koncz & Pal Szabo"
+__date__ = "2024-03-25"
+__copyright__ = "(C) 2024 by Bator Menyhert Koncz & Pal Szabo"
 
 # This will get replaced with a git SHA1 when you do a git archive
 
-__revision__ = '$Format:%H$'
+__revision__ = "$Format:%H$"
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
@@ -41,7 +41,7 @@ from qgis.core import (
     QgsGeometry,
     QgsProject,
     QgsVectorLayer,
-    QgsFeature
+    QgsFeature,
 )
 import rasterio
 import shapely
@@ -70,8 +70,8 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
     # used when calling the algorithm from another algorithm, or when
     # calling from the QGIS console.
 
-    OUTPUT = 'OUTPUT'
-    INPUT = 'INPUT'
+    OUTPUT = "OUTPUT"
+    INPUT = "INPUT"
     offset = "offset"
 
     def initAlgorithm(self, config):
@@ -79,30 +79,28 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         Here we define the inputs and output of the algorithm, along
         with some other properties.
         """
-        
+
         # Add input raster field:
         self.addParameter(
-            QgsProcessingParameterFile(
-                self.INPUT,
-                self.tr("Input raster")
-        ))
-        
+            QgsProcessingParameterFile(self.INPUT, self.tr("Input raster"))
+        )
+
         # Add float input parameter field called offset:
         self.addParameter(
             QgsProcessingParameterNumber(
                 self.offset,
                 self.tr("meritumdegradáció"),
                 QgsProcessingParameterNumber.Double,
-                0.2
-        ))
+                0.2,
+            )
+        )
 
-
-    def processAlgorithm(self, parameters, context, feedback):
-        with rasterio.open(parameters[self.INPUT], "r") as src:
+    def core(self,inputPath, offset=0.2):
+        with rasterio.open(inputPath, "r") as src:
             data = src.read(1)
             profile = src.profile
             bounds = src.bounds
-            
+
         rowNum, colNum = data.shape
 
         totalWidth = bounds.right - bounds.left
@@ -116,7 +114,9 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
             y = bounds.top - (row - 1 / 2) * pixelHeight
             return x, y
 
-        def point_to_square(centerx, centery, pixelWidth=pixelWidth, pixelHeight=pixelHeight):
+        def point_to_square(
+            centerx, centery, pixelWidth=pixelWidth, pixelHeight=pixelHeight
+        ):
             return shapely.geometry.Polygon(
                 [
                     [centerx - pixelWidth / 2, centery - pixelHeight / 2],
@@ -127,18 +127,29 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 ]
             )
 
-        data -= np.ones(shape=data.shape) * parameters[self.offset]
+        data -= np.ones(shape=data.shape) * offset
 
-        kernel = photutils.segmentation.make_2dgaussian_kernel(1.4, size=7)  # FWHM = 3.0
+        kernel = photutils.segmentation.make_2dgaussian_kernel(
+            1.4, size=7
+        )  # FWHM = 3.0
         convolved_data = astropy.convolution.convolve(data, kernel)
 
         npixels = 4
-        segment_map = photutils.segmentation.detect_sources(convolved_data, np.ones(shape=data.shape) * 0.08,
-                                                            npixels=npixels, connectivity=4)
+        segment_map = photutils.segmentation.detect_sources(
+            convolved_data,
+            np.ones(shape=data.shape) * 0.08,
+            npixels=npixels,
+            connectivity=4,
+        )
 
-        segm_deblend = photutils.segmentation.deblend_sources(convolved_data, segment_map,
-                                                              npixels=npixels, nlevels=500, contrast=0.0001,
-                                                              progress_bar=True)
+        segm_deblend = photutils.segmentation.deblend_sources(
+            convolved_data,
+            segment_map,
+            npixels=npixels,
+            nlevels=500,
+            contrast=0.0001,
+            progress_bar=True,
+        )
 
         shapes = []
 
@@ -155,12 +166,25 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 )
             )
 
-        gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer="polygons", engine="pyogrio")
-        
+        gpd.GeoSeries(shapes).set_crs(3857).to_file(
+            "/Users/palszabo/pal/ndveye/pixels.gpkg",
+            driver="GPKG",
+            layer="polygons",
+            engine="pyogrio",
+        )
+
         shapes = [each.centroid for each in shapes]
-        gpd.GeoSeries(shapes).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer="points", engine="pyogrio")
-        
-        return {"Found this many": len(shapes),"offset": parameters[self.offset]}
+        gpd.GeoSeries(shapes).set_crs(3857).to_file(
+            "/Users/palszabo/pal/ndveye/pixels.gpkg",
+            driver="GPKG",
+            layer="points",
+            engine="pyogrio",
+        )
+
+        return {"Found this many": len(shapes)}
+
+    def processAlgorithm(self, parameters, context, feedback):
+        return self.core(parameters[self.INPUT],parameters[self.offset])
 
     def name(self):
         """
@@ -170,7 +194,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'ndveye'
+        return "ndveye"
 
     def displayName(self):
         """
@@ -194,10 +218,10 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return ''
+        return ""
 
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate("Processing", string)
 
     def createInstance(self):
         return ndveyeAlgorithm()
