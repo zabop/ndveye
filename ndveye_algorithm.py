@@ -22,13 +22,13 @@
  ***************************************************************************/
 """
 
-__author__ = 'Bator Menyhert Koncz & Pal Szabo'
-__date__ = '2024-03-25'
-__copyright__ = '(C) 2024 by Bator Menyhert Koncz & Pal Szabo'
+__author__ = "Bator Menyhert Koncz & Pal Szabo"
+__date__ = "2024-03-25"
+__copyright__ = "(C) 2024 by Bator Menyhert Koncz & Pal Szabo"
 
 # This will get replaced with a git SHA1 when you do a git archive
 
-__revision__ = '$Format:%H$'
+__revision__ = "$Format:%H$"
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
@@ -38,11 +38,12 @@ from qgis.core import (
     QgsProcessingParameterMultipleLayers,
     QgsProcessingParameterFile,
     QgsProcessingParameterNumber,
+    QgsProcessingParameterBoolean,
     QgsPointXY,
     QgsGeometry,
     QgsProject,
     QgsVectorLayer,
-    QgsFeature
+    QgsFeature,
 )
 import os
 import rasterio
@@ -73,9 +74,8 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
     # used when calling the algorithm from another algorithm, or when
     # calling from the QGIS console.
 
-    OUTPUT = 'OUTPUT'
-    INPUT = 'INPUT'
-    offset = "offset"
+    OUTPUT = "OUTPUT"
+    INPUT = "INPUT"
 
     def initAlgorithm(self, config):
         """
@@ -87,39 +87,94 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
             QgsProcessingParameterMultipleLayers(
                 "inputRasters",
                 # accept any raster layers:
-                self.tr("Multiple input layers"),   
+                self.tr("Input raster(s)"),
                 QgsProcessing.TypeRaster,
-                
             )
         )
-        
+
         # Add float input parameter field called offset:
         self.addParameter(
             QgsProcessingParameterNumber(
-                self.offset,
-                self.tr("meritumdegradáció"),
-                QgsProcessingParameterNumber.Double,
-                0.2
-        ))
+                "offset", self.tr("offset"), QgsProcessingParameterNumber.Double, 0.2
+            )
+        )
 
+        # Add float input parameter field called offset:
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                "fwhm", self.tr("fwhm"), QgsProcessingParameterNumber.Double, 1.4
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                "kernel_size",
+                self.tr("kernel_size"),
+                QgsProcessingParameterNumber.Integer,
+                7,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                "threshold",
+                self.tr("threshold"),
+                QgsProcessingParameterNumber.Double,
+                0.08,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                "minimum_pixel_count",
+                self.tr("minimum_pixel_count"),
+                QgsProcessingParameterNumber.Integer,
+                8,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                "connectivity8",
+                self.tr("connectivity8"),
+                defaultValue=False,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                "nlevels",
+                self.tr("nlevels"),
+                QgsProcessingParameterNumber.Integer,
+                500,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterNumber(
+                "contrast",
+                self.tr("contrast"),
+                QgsProcessingParameterNumber.Double,
+                0.0001,
+            )
+        )
 
     def processAlgorithm(self, parameters, context, feedback):
-        polygondfs=[]
-        pointdfs=[]
+        polygondfs = []
+        pointdfs = []
         for index, inputId in enumerate(parameters["inputRasters"]):
+            counter = 0
+            for _, v in QgsProject.instance().mapLayers().items():
+                if v.id() == inputId:
+                    inputFile = v.source()
+                    counter += 1
+            assert counter < 2, "Multiple layers with the same id found"
 
-            counter=0
-            for _,v in QgsProject.instance().mapLayers().items():
-                if v.id()==inputId:
-                    inputFile=v.source()
-                    counter+=1
-            assert counter<2, "Multiple layers with the same id found"
-        
             with rasterio.open(inputFile, "r") as src:
                 data = src.read(1)
                 profile = src.profile
                 bounds = src.bounds
-                
+
             rowNum, colNum = data.shape
 
             totalWidth = bounds.right - bounds.left
@@ -133,7 +188,9 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 y = bounds.top - (row + 1 / 2) * pixelHeight
                 return x, y
 
-            def point_to_square(centerx, centery, pixelWidth=pixelWidth, pixelHeight=pixelHeight):
+            def point_to_square(
+                centerx, centery, pixelWidth=pixelWidth, pixelHeight=pixelHeight
+            ):
                 return shapely.geometry.Polygon(
                     [
                         [centerx - pixelWidth / 2, centery - pixelHeight / 2],
@@ -144,21 +201,30 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                     ]
                 )
 
-            data -= np.ones(shape=data.shape) * parameters[self.offset]
+            data -= np.ones(shape=data.shape) * parameters["offset"]
 
-            kernel = photutils.segmentation.make_2dgaussian_kernel(1.4, size=7)  # FWHM = 3.0
+            kernel = photutils.segmentation.make_2dgaussian_kernel(
+                parameters["fwhm"], size=parameters["kernel_size"]
+            )
             convolved_data = astropy.convolution.convolve(data, kernel)
 
-            npixels = 4
-            segment_map = photutils.segmentation.detect_sources(convolved_data, np.ones(shape=data.shape) * 0.08,
-                                                                npixels=npixels, connectivity=4)
+            segment_map = photutils.segmentation.detect_sources(
+                convolved_data,
+                np.ones(shape=data.shape) * parameters["threshold"],
+                npixels=parameters["minimum_pixel_count"],
+                connectivity=8 if parameters["connectivity8"] else 4,
+            )
 
-            segm_deblend = photutils.segmentation.deblend_sources(convolved_data, segment_map,
-                                                                npixels=npixels, nlevels=500, contrast=0.0001,
-                                                                progress_bar=True)
+            segm_deblend = photutils.segmentation.deblend_sources(
+                convolved_data,
+                segment_map,
+                npixels=parameters["minimum_pixel_count"],
+                nlevels=parameters["nlevels"],
+                contrast=parameters["contrast"],
+                progress_bar=True,
+            )
 
             shapes = []
-
             for label in segm_deblend.labels:
                 xs, ys = np.where(np.array(segm_deblend) == label)
                 targetPixels = [[x, y] for (x, y) in zip(xs, ys)]
@@ -166,27 +232,43 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 shapes.append(
                     shapely.unary_union(
                         [
-                            point_to_square(*pixelcoord_to_epsg3857(*each)).buffer(0.001)
+                            point_to_square(*pixelcoord_to_epsg3857(*each)).buffer(
+                                0.001
+                            )
                             for each in targetPixels
                         ]
                     )
                 )
-            group=os.path.basename(inputFile).replace(".tif","")
+            group = os.path.basename(inputFile).replace(".tif", "")
 
             geom = gpd.GeoSeries(shapes).set_crs(3857)
             gdf = gpd.GeoDataFrame(geometry=geom)
-            gdf["group"]=group
+            gdf["group"] = group
             polygondfs.append(gdf)
-        
+
             geom = [each.centroid for each in shapes]
             gdf = gpd.GeoDataFrame(geometry=geom)
-            gdf["group"]=group
+            gdf["group"] = group
             pointdfs.append(gdf)
 
-        #gdf.to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=group, engine="pyogrio")
-        gpd.GeoDataFrame(pd.concat(polygondfs)).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer="polygons", engine="pyogrio")    
-        gpd.GeoDataFrame(pd.concat(pointdfs)).set_crs(3857).to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer="points", engine="pyogrio")    
-        return {"Found this many": len(shapes),"offset": parameters[self.offset], "parameters":parameters}
+        # gdf.to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=group, engine="pyogrio")
+        gpd.GeoDataFrame(pd.concat(polygondfs)).set_crs(3857).to_file(
+            "/Users/palszabo/pal/ndveye/pixels.gpkg",
+            driver="GPKG",
+            layer="polygons",
+            engine="pyogrio",
+        )
+        gpd.GeoDataFrame(pd.concat(pointdfs)).set_crs(3857).to_file(
+            "/Users/palszabo/pal/ndveye/pixels.gpkg",
+            driver="GPKG",
+            layer="points",
+            engine="pyogrio",
+        )
+        return {
+            "Found this many": len(shapes),
+            "offset": parameters["offset"],
+            "parameters": parameters,
+        }
 
     def name(self):
         """
@@ -196,7 +278,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'ndveye'
+        return "ndveye"
 
     def displayName(self):
         """
@@ -220,10 +302,10 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return ''
+        return ""
 
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate("Processing", string)
 
     def createInstance(self):
         return ndveyeAlgorithm()
