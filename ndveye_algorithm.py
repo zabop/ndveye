@@ -95,21 +95,21 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         # Add float input parameter field called offset:
         self.addParameter(
             QgsProcessingParameterNumber(
-                "offset", self.tr("offset"), QgsProcessingParameterNumber.Double, 0.2
+                "Background offset", self.tr("Background offset"), QgsProcessingParameterNumber.Double, 0.2
             )
         )
 
         # Add float input parameter field called offset:
         self.addParameter(
             QgsProcessingParameterNumber(
-                "fwhm", self.tr("fwhm"), QgsProcessingParameterNumber.Double, 1.4
+                "Kernel FWHM", self.tr("Kernel FWHM"), QgsProcessingParameterNumber.Double, 1.4
             )
         )
 
         self.addParameter(
             QgsProcessingParameterNumber(
-                "kernel_size",
-                self.tr("kernel_size"),
+                "Kernel size",
+                self.tr("Kernel size"),
                 QgsProcessingParameterNumber.Integer,
                 7,
             )
@@ -117,8 +117,8 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterNumber(
-                "threshold",
-                self.tr("threshold"),
+                "Detection threshold",
+                self.tr("Detection threshold"),
                 QgsProcessingParameterNumber.Double,
                 0.08,
             )
@@ -126,8 +126,8 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterNumber(
-                "minimum_pixel_count",
-                self.tr("minimum_pixel_count"),
+                "Minimum pixel count",
+                self.tr("Minimum pixel count"),
                 QgsProcessingParameterNumber.Integer,
                 8,
             )
@@ -135,16 +135,16 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterBoolean(
-                "connectivity8",
-                self.tr("connectivity8"),
+                "Connectivity: use 8 instead of 4",
+                self.tr("Connectivity: use 8 instead of 4"),
                 defaultValue=False,
             )
         )
 
         self.addParameter(
             QgsProcessingParameterNumber(
-                "nlevels",
-                self.tr("nlevels"),
+                "Number of deblending thresholds",
+                self.tr("Number of deblending thresholds"),
                 QgsProcessingParameterNumber.Integer,
                 500,
             )
@@ -152,10 +152,26 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
 
         self.addParameter(
             QgsProcessingParameterNumber(
-                "contrast",
-                self.tr("contrast"),
+                "Minimum contrast for object separation",
+                self.tr("Minimum contrast for object separation"),
                 QgsProcessingParameterNumber.Double,
                 0.0001,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                "Output: polygons",
+                self.tr("Output: polygons"),
+                defaultValue=True,
+            )
+        )
+
+        self.addParameter(
+            QgsProcessingParameterBoolean(
+                "Output: points",
+                self.tr("Output: points"),
+                defaultValue=True,
             )
         )
 
@@ -201,26 +217,26 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                     ]
                 )
 
-            data -= np.ones(shape=data.shape) * parameters["offset"]
+            data -= np.ones(shape=data.shape) * parameters["Background offset"]
 
             kernel = photutils.segmentation.make_2dgaussian_kernel(
-                parameters["fwhm"], size=parameters["kernel_size"]
+                parameters["Kernel FWHM"], size=parameters["Kernel size"]
             )
             convolved_data = astropy.convolution.convolve(data, kernel)
 
             segment_map = photutils.segmentation.detect_sources(
                 convolved_data,
-                np.ones(shape=data.shape) * parameters["threshold"],
-                npixels=parameters["minimum_pixel_count"],
-                connectivity=8 if parameters["connectivity8"] else 4,
+                np.ones(shape=data.shape) * parameters["Detection threshold"],
+                npixels=parameters["Minimum pixel count"],
+                connectivity=8 if parameters["Connectivity: use 8 instead of 4"] else 4,
             )
 
             segm_deblend = photutils.segmentation.deblend_sources(
                 convolved_data,
                 segment_map,
-                npixels=parameters["minimum_pixel_count"],
-                nlevels=parameters["nlevels"],
-                contrast=parameters["contrast"],
+                npixels=parameters["Minimum pixel count"],
+                nlevels=parameters["Number of deblending thresholds"],
+                contrast=parameters["Minimum contrast for object separation"],
                 progress_bar=True,
             )
 
@@ -251,22 +267,27 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
             gdf["group"] = group
             pointdfs.append(gdf)
 
-        # gdf.to_file("/Users/palszabo/pal/ndveye/pixels.gpkg", driver="GPKG", layer=group, engine="pyogrio")
-        gpd.GeoDataFrame(pd.concat(polygondfs)).set_crs(3857).to_file(
-            "/Users/palszabo/pal/ndveye/pixels.gpkg",
-            driver="GPKG",
-            layer="polygons",
-            engine="pyogrio",
-        )
-        gpd.GeoDataFrame(pd.concat(pointdfs)).set_crs(3857).to_file(
-            "/Users/palszabo/pal/ndveye/pixels.gpkg",
-            driver="GPKG",
-            layer="points",
-            engine="pyogrio",
-        )
+        if parameters["Output: polygons"]:
+            gpd.GeoDataFrame(pd.concat(polygondfs)).set_crs(3857).to_file(
+                "/Users/palszabo/ndveye/polygons.gpkg",
+                driver="GPKG",
+                layer="polygons",
+                engine="pyogrio",
+            )
+            QgsProject.instance().addMapLayer(QgsVectorLayer("/Users/palszabo/ndveye/polygons.gpkg", "resultPolygons", "ogr"))   
+
+        if parameters["Output: points"]:
+            gpd.GeoDataFrame(pd.concat(pointdfs)).set_crs(3857).to_file(
+                "/Users/palszabo/ndveye/points.gpkg",
+                driver="GPKG",
+                layer="points",
+                engine="pyogrio",
+            )
+            QgsProject.instance().addMapLayer(QgsVectorLayer("/Users/palszabo/ndveye/points.gpkg", "resultPoints", "ogr"))   
+
         return {
             "Found this many": len(shapes),
-            "offset": parameters["offset"],
+            "Background offset": parameters["Background offset"],
             "parameters": parameters,
         }
 
