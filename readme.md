@@ -1,6 +1,5 @@
 # NDVeye Plugin
 
-
 ## Algorithm details
 
 ## Example workflows
@@ -19,6 +18,15 @@ There are some yet unmapped reefs within lagoons of the Tuamotus islands:
 We can polygonize these reefs using NDVeye. Let's use Sentinel-2 imagery as raster input. [EO Browser](https://apps.sentinel-hub.com/eo-browser) can help us acquire suitable imagery. There, we can search for *Toau atoll*, edit cloud coverage settings, copy the s3 path of the image & visualize it straight away:
 
 ![gif](https://github.com/zabop/ndveye/blob/master/docs/sentinel2download.gif?raw=true)
+
+You can inspect the different bands in EO, and list the files using AWS s3 CLI:
+
+```
+aws s3 ls --request-payer requester s3://sentinel-s2-l2a/tiles/6/L/XH/2024/3/26/0/ --recursive
+```
+
+I choose to work with the B04 band. Download imagery:
+
 
 ### Bush density estimation
 
