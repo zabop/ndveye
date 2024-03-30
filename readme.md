@@ -46,6 +46,17 @@ We need a polygon to clip B04.tif by. Let's draw a polygon on the area of intere
 
 ![image](https://github.com/zabop/ndveye/blob/master/docs/cropRaster.gif?raw=true)
 
+We can use the *Identify Features* functionality to explore the pixel values of the layer *in* we just created:
+
+![image](https://i.imgur.com/gaT5ym3.png)
+
+The background, ie non-reef water pixels have value around a 1000. The reefs have pixel values a few hundred more. The smallest reefs we can hope to identify are 1 or 2 pixels wide, consisting of ~4 pixels at a minimum.
+
+#### Launch NDVeye
+
+Open NDVeye from the Processing Toolbox. Specify input parameters, keeping in mind the numbers in the previous paragraph. Since we don't need deblending (ie we don't want to separate reefs which are touching), I set the *Minimum contrast for object separation* field to one.
+![image](https://github.com/zabop/ndveye/blob/master/docs/ndveye_reef_detection.gif?raw=true)
+
 ### Bush density estimation
 
 ## Contribute
