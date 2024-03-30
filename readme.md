@@ -58,6 +58,12 @@ Open NDVeye from the Processing Toolbox. Specify input parameters, keeping in mi
 ![image](https://github.com/zabop/ndveye/blob/master/docs/ndveye_reef_detection.gif?raw=true)
 In the end, two layers (one of points, one of polygons) are added to canvas.
 
+#### Polish results
+
+We can edit the style settings of our newly created polygon layer, and inspect the results. If we find there many reefs we haven't found, we need to change the input parameters (lowering *Detection threshold* would probably be a good first try.) Overall, this run was fairly successful, we found most reefs. There are a few false detections, but we cand delete these easily (I press the Backspace after highlighting the erroneous polygons):
+![image](https://github.com/zabop/ndveye/blob/master/docs/deletePolygons.gif?raw=true)
+As visible, quite a few reefs have been found!
+
 ### Bush density estimation
 
 ## Contribute
