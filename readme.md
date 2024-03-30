@@ -56,6 +56,7 @@ The background, ie non-reef water pixels have value around a 1000. The reefs hav
 
 Open NDVeye from the Processing Toolbox. Specify input parameters, keeping in mind the numbers in the previous paragraph. Since we don't need deblending (ie we don't want to separate reefs which are touching), I set the *Minimum contrast for object separation* field to one.
 ![image](https://github.com/zabop/ndveye/blob/master/docs/ndveye_reef_detection.gif?raw=true)
+In the end, two layers (one of points, one of polygons) are added to canvas.
 
 ### Bush density estimation
 
