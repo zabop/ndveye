@@ -19,14 +19,20 @@ We can polygonize these reefs using NDVeye. Let's use Sentinel-2 imagery as rast
 
 ![gif](https://github.com/zabop/ndveye/blob/master/docs/sentinel2download.gif?raw=true)
 
-You can inspect the different bands in EO, and list the files using AWS s3 CLI:
+You can inspect the different bands in EO, and list available files using AWS s3 CLI:
 
 ```
 aws s3 ls --request-payer requester sentinel-s2-l2a/tiles/6/L/XH/2024/3/26/0/ --recursive
 ```
 
-I choose to work with the B04 band. Download imagery:
+I chose to work with the B04 band. Download imagery:
 
+```
+aws s3 cp --request-payer requester s3://sentinel-s2-l2a/tiles/6/L/XH/2024/3/26/0/R10m/B04.jp2 .
+```
+
+Drag and drop B04.jp2 to QGIS. Add *Bing Aerial* basemap (I like using [QuickMapServices](https://plugins.qgis.org/plugins/quick_map_services/) for this). Zoom to `-15.918, -145.932` (I can recommend the [Lat Lon Tools plugin](https://plugins.qgis.org/plugins/latlontools/)). 
+![image](https://github.com/zabop/ndveye/blob/master/docs/dataImport.gif?raw=true)
 
 ### Bush density estimation
 
