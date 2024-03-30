@@ -22,7 +22,7 @@ We can polygonize these reefs using NDVeye. Let's use Sentinel-2 imagery as rast
 You can inspect the different bands in EO, and list the files using AWS s3 CLI:
 
 ```
-aws s3 ls --request-payer requester s3://sentinel-s2-l2a/tiles/6/L/XH/2024/3/26/0/ --recursive
+aws s3 ls --request-payer requester sentinel-s2-l2a/tiles/6/L/XH/2024/3/26/0/ --recursive
 ```
 
 I choose to work with the B04 band. Download imagery:
