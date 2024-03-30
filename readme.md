@@ -32,6 +32,9 @@ aws s3 cp --request-payer requester s3://sentinel-s2-l2a/tiles/6/L/XH/2024/3/26/
 ```
 
 Drag and drop B04.jp2 to QGIS. Add *Bing Aerial* basemap (I like using [QuickMapServices](https://plugins.qgis.org/plugins/quick_map_services/) for this). Zoom to `-15.918, -145.932` (I can recommend the [Lat Lon Tools plugin](https://plugins.qgis.org/plugins/latlontools/)). 
+
+These few steps in a gif:
+
 ![image](https://github.com/zabop/ndveye/blob/master/docs/dataImport.gif?raw=true)
 
 ### Bush density estimation
