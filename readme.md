@@ -38,8 +38,6 @@ We will use these rasters as input to NDVI. Explore pixel values:
 Keeping these values in mind, we can launch NDVeye to identify corn plants:
 ![image](https://github.com/zabop/ndveye/blob/master/docs/ndveye_for_corn.gif?raw=true)
 
-
-
 ### II.2 Reef mapping
 
 #### Motivation
