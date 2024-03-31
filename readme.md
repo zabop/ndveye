@@ -6,6 +6,19 @@
 
 ### II.1 Corn counting
 
+#### Motivation
+
+In agriculture, it is often useful to know how many corn plants grow in a section of land. Experiments on different types of plants & treatments are often very localised. It is therefore helpful to be able quickly count how many corn plants there are in a row.
+
+
+#### Get data
+
+Download an example NDVI raster:
+```
+curl -O 'https://raw.githubusercontent.com/zabop/ndveye/master/docs/NDVIsource.tif'
+```
+(We recorded the data using a DJI drone. We modified the location for privacy reasons.)
+
 ### II.2 Reef mapping
 
 #### Motivation
