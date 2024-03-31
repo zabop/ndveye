@@ -1,6 +1,9 @@
 # NDVeye Plugin
 
-
+A QGIS plugin allowing you to go from raster like this:
+![](https://i.imgur.com/FGqbVTf.png)
+To polygons like this:
+![](https://i.imgur.com/MkjoFC7.png)
 
 ## I. Algorithm details
 
@@ -134,3 +137,4 @@ There are some issues with the plugin, listed below. We welcome help with any of
 - The progress bar is not very expressive. It is not a big deal when the input rasters are small and few, but when this is not the case, a better progress bar would be convinient.
 - Input types are highly constrained now. Raster inputs are tested using *float32*, and it is known that some other widely used types are not compatible with some of the functions used now (background subtraction for instance). A fix would probably avoid some annoyance.
 - Input raster has to be projected in EPSG:3857 now, as georeferencing of Astropy results assumes this projection. Probably it's not very big deal to expand the supported projections - we should do so.
+- Sometimes, the plugin launches another QGIS instance. Reason unknown. Slightly annoying.
