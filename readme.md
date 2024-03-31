@@ -25,9 +25,10 @@ If you prefer not using the terminal, you can also download the file from [here]
 #### Prepare input
 
 Open the downloaded TIF file in QGIS. Draw a polygon around some of the rows:
-
+![image](https://github.com/zabop/ndveye/blob/master/docs/drawCornSections.gif?raw=true)
 
 Create 4 raster files from these polygons:
+![image](https://github.com/zabop/ndveye/blob/master/docs/extract4rasters.gif?raw=true)
 
 
 We will use these rasters as input to NDVI. Explore pixel values:
@@ -35,6 +36,10 @@ We will use these rasters as input to NDVI. Explore pixel values:
 - Target pixel values are more than that by around $0.1$
 - The smallest targets consist of around 2 pixels
 - Smallest target's diameter is around 2 pixels. We found by trial and error that it is usually beneficial to undershoot this parameter, so let's just say smallest diameter is around 1.
+
+Keeping these values in mind, we can launch NDVeye to identify corn plants:
+![image](https://github.com/zabop/ndveye/blob/master/docs/ndveye_for_corn.gif?raw=true)
+
 
 
 ### II.2 Reef mapping
