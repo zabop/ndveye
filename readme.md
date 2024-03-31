@@ -17,7 +17,25 @@ Download an example NDVI raster:
 ```
 curl -O 'https://raw.githubusercontent.com/zabop/ndveye/master/docs/NDVIsource.tif'
 ```
-(We recorded the data using a DJI drone. We modified the location for privacy reasons.)
+
+If you prefer not using the terminal, you can also download the file from [here](https://github.com/zabop/ndveye/raw/master/docs/NDVIsource.tif).
+
+(We got the data using a DJI drone. We modified the location for privacy reasons.)
+
+#### Prepare input
+
+Open the downloaded TIF file in QGIS. Draw a polygon around some of the rows:
+
+
+Create 4 raster files from these polygons:
+
+
+We will use these rasters as input to NDVI. Explore pixel values:
+- Background (ie non-corn) pixel values are around $0.15$
+- Target pixel values are more than that by around $0.1$
+- The smallest targets consist of around 2 pixels
+- Smallest target's diameter is around 2 pixels. We found by trial and error that it is usually beneficial to undershoot this parameter, so let's just say smallest diameter is around 1.
+
 
 ### II.2 Reef mapping
 
