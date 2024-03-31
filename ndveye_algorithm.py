@@ -30,6 +30,7 @@ __copyright__ = "(C) 2024 by Bator Menyhert Koncz & Pal Szabo"
 
 __revision__ = "$Format:%H$"
 
+from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsProcessing,
@@ -44,6 +45,7 @@ from qgis.core import (
     QgsProject,
     QgsVectorLayer,
     QgsFeature,
+    QgsSimpleLineSymbolLayer,
 )
 import os
 import rasterio
@@ -95,14 +97,20 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         # Add float input parameter field called offset:
         self.addParameter(
             QgsProcessingParameterNumber(
-                "Background offset", self.tr("Background offset"), QgsProcessingParameterNumber.Double, 0.2
+                "Background offset",
+                self.tr("Background offset"),
+                QgsProcessingParameterNumber.Double,
+                0.2,
             )
         )
 
         # Add float input parameter field called offset:
         self.addParameter(
             QgsProcessingParameterNumber(
-                "Kernel FWHM", self.tr("Kernel FWHM"), QgsProcessingParameterNumber.Double, 1.4
+                "Kernel FWHM",
+                self.tr("Kernel FWHM"),
+                QgsProcessingParameterNumber.Double,
+                1.4,
             )
         )
 
@@ -274,7 +282,14 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 layer="polygons",
                 engine="pyogrio",
             )
-            QgsProject.instance().addMapLayer(QgsVectorLayer("/Users/palszabo/ndveye/polygons.gpkg", "resultPolygons", "ogr"))   
+            polygonLayer = QgsProject.instance().addMapLayer(
+                QgsVectorLayer(
+                    "/Users/palszabo/ndveye/polygons.gpkg", "resultPolygons", "ogr"
+                )
+            )
+            polygonLayer.renderer().symbol().changeSymbolLayer(
+                0, QgsSimpleLineSymbolLayer(QColor("orange"), width=1)
+            )
 
         if parameters["Output: points"]:
             gpd.GeoDataFrame(pd.concat(pointdfs)).set_crs(3857).to_file(
@@ -283,7 +298,11 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 layer="points",
                 engine="pyogrio",
             )
-            QgsProject.instance().addMapLayer(QgsVectorLayer("/Users/palszabo/ndveye/points.gpkg", "resultPoints", "ogr"))   
+            QgsProject.instance().addMapLayer(
+                QgsVectorLayer(
+                    "/Users/palszabo/ndveye/points.gpkg", "resultPoints", "ogr"
+                )
+            )
 
         return {
             "Found this many": len(shapes),
