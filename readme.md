@@ -12,6 +12,10 @@ After the image segmentation is complete, a so-called deblending is performed: i
 ![](https://photutils.readthedocs.io/en/stable/_images/segmentation-3.png)
 *Image source: [Photutils tutorial](https://photutils.readthedocs.io/en/stable/segmentation.html).*
 
+We follow a similar algorithm. First, we subtract background noise. Currently, this value is taken to be constant throughout the image. The user interface refers to this value as *Background offset*. [This line](https://github.com/zabop/ndveye/blob/a3484582f6a13fd6a0c87cf4c545e8cfd539f71b/ndveye_algorithm.py#L229) performs the subtraction.
+
+Then, we convolve the background subtracted raster with a 2D Gaussian. We use [`astropy.convolution.convolve`](https://docs.astropy.org/en/stable/api/astropy.convolution.convolve.html) ([here](https://github.com/zabop/ndveye/blob/a3484582f6a13fd6a0c87cf4c545e8cfd539f71b/ndveye_algorithm.py#L234C30-L234C58)) and [`photutils.segmentation.make_2dgaussian_kernel`](https://photutils.readthedocs.io/en/latest/api/photutils.segmentation.make_2dgaussian_kernel.html) ([here](https://github.com/zabop/ndveye/blob/a3484582f6a13fd6a0c87cf4c545e8cfd539f71b/ndveye_algorithm.py#L231C22-L231C67)). Users can set *fwhm* and *size* values of the Gaussian (through fields *Kernel FWHM* and *Kernel size*).
+
 ## II. Example workflows
 
 ### II.1 Corn counting
