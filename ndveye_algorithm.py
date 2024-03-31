@@ -46,6 +46,7 @@ from qgis.core import (
     QgsVectorLayer,
     QgsFeature,
     QgsSimpleLineSymbolLayer,
+    QgsSimpleMarkerSymbolLayer,
 )
 import os
 import rasterio
@@ -288,7 +289,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 )
             )
             polygonLayer.renderer().symbol().changeSymbolLayer(
-                0, QgsSimpleLineSymbolLayer(QColor("orange"), width=1)
+                0, QgsSimpleLineSymbolLayer(QColor("#ebe134"), width=1)
             )
 
         if parameters["Output: points"]:
@@ -298,10 +299,13 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 layer="points",
                 engine="pyogrio",
             )
-            QgsProject.instance().addMapLayer(
+            pointsLayer = QgsProject.instance().addMapLayer(
                 QgsVectorLayer(
                     "/Users/palszabo/ndveye/points.gpkg", "resultPoints", "ogr"
                 )
+            )
+            pointsLayer.renderer().symbol().changeSymbolLayer(
+                0, QgsSimpleMarkerSymbolLayer(color=QColor("#38db2c"), size=3)
             )
 
         return {
