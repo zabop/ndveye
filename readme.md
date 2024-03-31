@@ -18,6 +18,10 @@ Then, we convolve the background subtracted raster with a 2D Gaussian. We use [a
 
 We pass the result of the convolution to [photutils.segmentation.detect_sources](https://photutils.readthedocs.io/en/stable/api/photutils.segmentation.detect_sources.html) [here](https://github.com/zabop/ndveye/blob/4a51d134087c3739b86498a585cf05a853f4e1a2/ndveye_algorithm.py#L236C27-L236C64). Users can specify the *threshold* parameter of this function through the *Detection threshold* input field; the *npixels* parameter through the *Minimum pixel count* input field; and the *connectivity* parameter throught the *Connectivity: use 8 instead of 4* checkbox.
 
+[The next step](https://github.com/zabop/ndveye/blob/4a51d134087c3739b86498a585cf05a853f4e1a2/ndveye_algorithm.py#L243C28-L243C66) is source deblending, performed via [photutils.segmentation.deblend_sources](https://photutils.readthedocs.io/en/stable/api/photutils.segmentation.deblend_sources.html). The user specified *Minimum pixel count* is used again as the *npixels* parameter. The *nlevels* and *contrast* parameters are set via the *Number of deblending thresholds* and the *Minimum contrast for object separation* input fields.
+
+After these steps, detected sources (in the corn counting case: sources = corn plants) are polygonized & georeferenced through ordinary geospatial methods: no more astronomy software is involved.
+
 ## II. Example workflows
 
 ### II.1 Corn counting
@@ -126,5 +130,7 @@ There are some issues with the plugin, listed below. We welcome help with any of
 - Hard to install. We aim to make the core code available from within QGIS. Steps to achieve this outlined [here](https://plugins.qgis.org/publish/).
 - Some users might find it hard to install dependencies, such as [astropy](https://docs.astropy.org/en/stable/) and [photutils](https://photutils.readthedocs.io/en/stable/). We don't yet see an easy and straightforward solution to this.
 - Background offset is currently assumed to be constant throughout the input. This doesn't have to be the case. This [photutils](https://photutils.readthedocs.io/en/stable/segmentation.html#source-extraction-using-image-segmentation) tutorial uses more advanced background handling. We found that this is not necessary to achieve most of our objectives with the plugin, but this might change.
-- The user interface is complicated. For simple setups, we hope to make it more convinient.
+- The user interface is somewhat complicated. For simple setups, we hope to make it more convinient.
 - The progress bar is not very expressive. It is not a big deal when the input rasters are small and few, but when this is not the case, a better progress bar would be convinient.
+- Input types are highly constrained now. Raster inputs are tested using *float32*, and it is known that some other widely used types are not compatible with some of the functions used now (background subtraction for instance). A fix would probably avoid some annoyance.
+- Input raster has to be projected in EPSG:3857 now, as georeferencing of Astropy results assumes this projection. Probably it's not very big deal to expand the supported projections - we should do so.
