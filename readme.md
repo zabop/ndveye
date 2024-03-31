@@ -9,8 +9,9 @@ The algorithm NDVeye uses is largely based on this [photutils](https://photutils
 *Source: [Photutils tutorial](https://photutils.readthedocs.io/en/stable/segmentation.html)*
 
 After the image segmentation is complete, a so-called deblending is performed: in this process, light sources which are detected as one source but are actually multiple sources are separated to multiple sources. This image explains it well:
-![](https://photutils.readthedocs.io/en/stable/_images/segmentation-3.png)
-*Source: [Photutils tutorial](https://photutils.readthedocs.io/en/stable/segmentation.html)*
+|![](https://photutils.readthedocs.io/en/stable/_images/segmentation-3.png)
+|:--:| 
+|*Source: [Photutils tutorial](https://photutils.readthedocs.io/en/stable/segmentation.html)*|
 
 ## II. Example workflows
 
