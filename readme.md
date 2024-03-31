@@ -1,9 +1,15 @@
 # NDVeye Plugin
 
-A QGIS plugin allowing you to go from raster like this:
+A QGIS plugin allowing you to quickly go from raster like this:
 ![](https://i.imgur.com/FGqbVTf.png)
-To polygons like this:
+To polygons and points like these:
 ![](https://i.imgur.com/MkjoFC7.png)
+
+From rasters like this:
+![](https://i.imgur.com/04B5juN.png)
+To polygons and points like these:
+![](https://i.imgur.com/NFsg9jp.png)
+[Possible applications](https://github.com/zabop/ndveye?tab=readme-ov-file#ii2-reef-mapping).
 
 ## I. Algorithm details
 
