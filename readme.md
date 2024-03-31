@@ -105,5 +105,7 @@ We can edit the style settings of our newly created polygon layer, and inspect t
 ![image](https://github.com/zabop/ndveye/blob/master/docs/deletePolygons.gif?raw=true)
 Quite many reefs have been found!
 
-## Contribute
+## Further development
+There are some issues with the plugin, listed below. We welcome help with any of them, and we are curious to learn more about what else could be improved. Tell us: ndveye@protonmail.com.
+- Hard to install. We aim to make the core code available from within QGIS. [Steps](https://plugins.qgis.org/publish/).
 
