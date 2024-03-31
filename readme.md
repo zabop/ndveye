@@ -45,6 +45,8 @@ Keeping these values in mind, we can launch NDVeye to identify corn plants:
 If we aren't happy with the results, we can tweak NDVeye parameters a bit, or edit the layer we produced directly. Often, we will want to know the number of corn plants in each polygon. We can use the *Vector -> Analysis Tools -> Count Points in Polygon...* functionality to achieve that:
 ![image](https://i.imgur.com/bKijjHF.png)
 
+---------
+
 ### II.2 Reef mapping
 
 #### Motivation
@@ -102,8 +104,6 @@ In the end, two layers (one of points, one of polygons) are added to canvas.
 We can edit the style settings of our newly created polygon layer, and inspect the results. If we find there many reefs we haven't found, we need to change the input parameters (lowering *Detection threshold* would probably be a good first try.) Overall, this run was fairly successful, we found most reefs. There are a few false detections, but we cand delete these easily (I press the Backspace after highlighting the erroneous polygons):
 ![image](https://github.com/zabop/ndveye/blob/master/docs/deletePolygons.gif?raw=true)
 Quite many reefs have been found!
-
-### Bush density estimation
 
 ## Contribute
 
