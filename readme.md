@@ -1,6 +1,16 @@
 # NDVeye Plugin
 
+
+
 ## I. Algorithm details
+
+The algorithm NDVeye uses is largely based on this [photutils](https://photutils.readthedocs.io/en/stable/) tutorial: [*Image Segmentation*](https://photutils.readthedocs.io/en/stable/segmentation.html). There, the starting point is an image of (simulated) galaxies. After background noise subtraction comes image segmentation:
+![](https://photutils.readthedocs.io/en/stable/_images/segmentation-1.png)
+*Source: [Photutils tutorial](https://photutils.readthedocs.io/en/stable/segmentation.html)*
+
+After the image segmentation is complete, a so-called deblending is performed: in this process, light sources which are detected as one source but are actually multiple sources are separated to multiple sources. This image explains it well:
+![](https://photutils.readthedocs.io/en/stable/_images/segmentation-3.png)
+*Source: [Photutils tutorial](https://photutils.readthedocs.io/en/stable/segmentation.html)*
 
 ## II. Example workflows
 
@@ -106,7 +116,7 @@ We can edit the style settings of our newly created polygon layer, and inspect t
 Quite many reefs have been found!
 
 ## Further development
-There are some issues with the plugin, listed below. We welcome help with any of them, and we are curious to learn more about what else could be improved. Tell us: ndveye@protonmail.com.
+There are some issues with the plugin, listed below. We welcome help with any of them, and we are curious to learn more about what else could be improved. Open a Pull Request or contact us: ndveye@protonmail.com.
 - Hard to install. We aim to make the core code available from within QGIS. Steps to achieve this outlined [here](https://plugins.qgis.org/publish/).
 - Some users might find it hard to install dependencies, such as [astropy](https://docs.astropy.org/en/stable/) and [photutils](https://photutils.readthedocs.io/en/stable/). We don't yet see an easy and straightforward solution to this.
 - Background offset is currently assumed to be constant throughout the input. This doesn't have to be the case. This [photutils](https://photutils.readthedocs.io/en/stable/segmentation.html#source-extraction-using-image-segmentation) tutorial uses more advanced background handling. We found that this is not necessary to achieve most of our objectives with the plugin, but this might change.
