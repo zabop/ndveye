@@ -17,9 +17,7 @@ Download an example NDVI raster:
 ```
 curl -O 'https://raw.githubusercontent.com/zabop/ndveye/master/docs/NDVIsource.tif'
 ```
-
 If you prefer not using the terminal, you can also download the file from [here](https://github.com/zabop/ndveye/raw/master/docs/NDVIsource.tif).
-
 (We got the data using a DJI drone. We modified the location for privacy reasons.)
 
 #### Prepare input
