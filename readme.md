@@ -35,8 +35,15 @@ We will use these rasters as input to NDVI. Explore pixel values:
 - The smallest targets consist of around 2 pixels
 - Smallest target's diameter is around 2 pixels. We found by trial and error that it is usually beneficial to undershoot this parameter, so let's just say smallest diameter is around 1.
 
+#### Launch NDVeye
+
 Keeping these values in mind, we can launch NDVeye to identify corn plants:
 ![image](https://github.com/zabop/ndveye/blob/master/docs/ndveye_for_corn.gif?raw=true)
+
+#### Polish results
+
+If we aren't happy with the results, we can tweak NDVeye parameters a bit, or edit the layer we produced directly. Often, we will want to know the number of corn plants in each polygon. We can use the *Vector -> Analysis Tools -> Count Points in Polygon...* functionality to achieve that:
+![image](https://i.imgur.com/bKijjHF.png)
 
 ### II.2 Reef mapping
 
