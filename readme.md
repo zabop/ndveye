@@ -1,6 +1,6 @@
 # NDVeye Plugin
 
-A QGIS plugin allowing you to quickly go from raster like this:
+A QGIS plugin allowing you to quickly go from rasters like this:
 ![](https://i.imgur.com/FGqbVTf.png)
 To polygons and points like these:
 ![](https://i.imgur.com/MkjoFC7.png)
