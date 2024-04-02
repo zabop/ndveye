@@ -49,7 +49,6 @@ from qgis.core import (
     QgsSimpleMarkerSymbolLayer,
 )
 import os
-import rasterio
 import shapely
 import rasterio
 import numpy as np
