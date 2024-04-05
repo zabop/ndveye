@@ -100,7 +100,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 "Background offset",
                 self.tr("Background offset"),
                 QgsProcessingParameterNumber.Double,
-                0.2,
+                0.15,
             )
         )
 
@@ -110,7 +110,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 "Kernel FWHM",
                 self.tr("Kernel FWHM"),
                 QgsProcessingParameterNumber.Double,
-                1.4,
+                1.0,
             )
         )
 
@@ -137,7 +137,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 "Minimum pixel count",
                 self.tr("Minimum pixel count"),
                 QgsProcessingParameterNumber.Integer,
-                8,
+                2,
             )
         )
 
@@ -163,7 +163,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 "Minimum contrast for object separation",
                 self.tr("Minimum contrast for object separation"),
                 QgsProcessingParameterNumber.Double,
-                0.0001,
+                0.00005,
             )
         )
 
