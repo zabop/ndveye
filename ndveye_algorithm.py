@@ -292,11 +292,12 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
             )
 
         if parameters["Output: points"]:
-            gpd.GeoDataFrame(pd.concat(pointdfs)).set_crs(3857).to_file(
+            gpd.GeoSeries(pd.concat([e.geometry for e in pointdfs])).set_crs(3857).to_file(
                 "/Users/palszabo/ndveye/points.gpkg",
                 driver="GPKG",
                 layer="points",
                 engine="pyogrio",
+                index=False,
             )
             pointsLayer = QgsProject.instance().addMapLayer(
                 QgsVectorLayer(
