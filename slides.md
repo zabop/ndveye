@@ -7,3 +7,18 @@ height: 900
 ---
 
 # About us
+
+
+## Bator Koncz
+
+Education in agriculture
+
+Works as a plant doctor
+
+## Pal Szabo
+
+Education in astronomy
+
+Works as a data engineer
+
+## Not a Glint Solar project
