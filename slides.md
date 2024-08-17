@@ -31,4 +31,13 @@ Works as a data engineer
 
 # Results
 
+## 
+![image](https://github.com/zabop/ndveye/blob/master/docs/drawCornSections.gif?raw=true)
+
+##
+![image](https://github.com/zabop/ndveye/blob/master/docs/extract4rasters.gif?raw=true)
+
+##
+![image](https://github.com/zabop/ndveye/blob/master/docs/ndveye_for_corn.gif?raw=true)
+
 # Future
