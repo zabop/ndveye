@@ -23,9 +23,70 @@ Works as a data engineer
 
 ## Not a Glint Solar project
 
-# Motivation
+# Corn experiments
 
-# Plan
+## Normal workflow:
+. . .
+
+1. Fly a drone
+
+. . .
+
+2. Produce NDVI raster
+
+. . . 
+
+3. Count by hand
+
+. . .
+
+##
+
+![](https://i.ytimg.com/vi/4f8NiLApHLk/maxresdefault.jpg)
+
+##
+
+![](images/cultiwise-webpage.png)
+
+## Let's automate counting!
+
+. . . 
+
+Copy astronomy workflow:
+
+. . .
+
+1. Obtain imagery
+
+. . .
+
+2. Background subtraction
+
+. . . 
+
+3. Image segmentation
+
+. . . 
+
+4. Source deblending
+
+. . . 
+
+##
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/TESS_Mission_%2841512968122%29.jpg/2880px-TESS_Mission_%2841512968122%29.jpg)
+
+:::notes
+https://en.wikipedia.org/wiki/Transiting_Exoplanet_Survey_Satellite#/media/File:TESS_Mission_(41512968122).jpg
+:::
+
+##
+
+![](https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/TESS-FirstLight20180807-Released20180917.jpg/1920px-TESS-FirstLight20180807-Released20180917.jpg)
+
+:::notes
+https://en.wikipedia.org/wiki/Transiting_Exoplanet_Survey_Satellite#/media/File:TESS-FirstLight20180807-Released20180917.jpg
+:::
 
 # Implementation
 
