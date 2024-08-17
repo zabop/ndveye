@@ -22,3 +22,13 @@ Education in astronomy
 Works as a data engineer
 
 ## Not a Glint Solar project
+
+# Motivation
+
+# Plan
+
+# Implementation
+
+# Results
+
+# Future
