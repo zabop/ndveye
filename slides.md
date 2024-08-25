@@ -8,7 +8,6 @@ height: 900
 
 # About us
 
-
 ## Bator Koncz
 
 Education in agriculture
@@ -25,7 +24,18 @@ Works as a data engineer
 
 # Corn experiments
 
-## Normal workflow:
+## Traditional workflow
+
+##
+
+![](images/village_counts.png)
+
+##
+
+![](images/guy_counts.jpeg)
+
+## Workflow using a drone:
+
 . . .
 
 1. Fly a drone
@@ -36,17 +46,25 @@ Works as a data engineer
 
 . . . 
 
-3. Count by hand
+3. Count
 
 . . .
 
 ##
 
-![](https://i.ytimg.com/vi/4f8NiLApHLk/maxresdefault.jpg)
+![](images/drone-clean.webp)
+
+##
+
+![](images/corn_field.jpg)
 
 ##
 
 ![](images/cultiwise-webpage.png)
+
+##
+
+![](images/NDVIraster.png)
 
 ## Let's automate counting!
 
@@ -90,7 +108,7 @@ https://en.wikipedia.org/wiki/Transiting_Exoplanet_Survey_Satellite#/media/File:
 
 # Implementation
 
-# Results
+# Usage
 
 ## 
 ![](https://github.com/zabop/ndveye/blob/master/docs/drawCornSections.gif?raw=true)
@@ -102,3 +120,6 @@ https://en.wikipedia.org/wiki/Transiting_Exoplanet_Survey_Satellite#/media/File:
 ![](https://github.com/zabop/ndveye/blob/master/docs/ndveye_for_corn.gif?raw=true)
 
 # Future
+
+## Alternatives
+
