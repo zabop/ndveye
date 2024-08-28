@@ -2,8 +2,8 @@
 % Bator Koncz & Pal Szabo
 % QGIS UC 2024 Bratislava
 ---
-width: 1600
-height: 900
+width: 1000
+height: 500
 ---
 
 # About us
