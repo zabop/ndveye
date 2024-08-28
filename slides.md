@@ -12,7 +12,7 @@ height: 500
 
 Education in agriculture
 
-Works as a plant doctor
+Works as an agronomist
 
 ## Pal Szabo
 
