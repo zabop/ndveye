@@ -1,13 +1,7 @@
 :root {
     --r-heading-text-transform: none;
   }
-
-.reveal section img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
+  
   /*
   .reveal pre {
     font-size: 0.45em;
