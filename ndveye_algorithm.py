@@ -75,127 +75,150 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
     OUTPUT = "OUTPUT"
     INPUT = "INPUT"
 
+    def add_param(self, param, help_text=None):
+        if help_text:
+            param.setHelp(help_text)
+        self.add_param(param)
+
     def initAlgorithm(self, config):
         """
         Here we define the inputs and output of the algorithm, along
         with some other properties.
         """
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterMultipleLayers(
                 "inputRasters",
                 # accept any raster layers:
                 self.tr("Input raster(s)"),
                 QgsProcessing.TypeRaster,
-            )
+            ),
+            "The layer that will be analysed and where the plants will be counted by the algorithm. Consider preprocessing these layers by using spectral indeces, such as NDVI."
         )
 
-        # Add float input parameter field called offset:
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterNumber(
                 "Background offset",
                 self.tr("Background offset"),
                 QgsProcessingParameterNumber.Double,
-                0.15,
-            )
+                defaultValue=0.15,
+                minValue=0.0,
+                maxValue=0.9
+            ),
+            "This value will be subtracted from each pixel to make the true features stand out more. In case of a brighter background (for example due to more weeds) a higher background offset will improve the algorithms' results."
         )
 
-        # Add float input parameter field called Kernel FWHM:
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterNumber(
                 "Kernel FWHM",
                 self.tr("Kernel FWHM"),
                 QgsProcessingParameterNumber.Double,
                 1.0,
-            )
+            ),
+            "The full-width at half-maximum (FWHM) of the 2D circular Gaussian kernel."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterNumber(
                 "Kernel size",
                 self.tr("Kernel size"),
                 QgsProcessingParameterNumber.Integer,
                 7,
-            )
+            ),
+            "The size of the kernel along each axis, this must be an odd value."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterNumber(
                 "Detection threshold",
                 self.tr("Detection threshold"),
                 QgsProcessingParameterNumber.Double,
-                0.08,
-            )
+                defaultValue=0.5,
+                minValue=0.0,
+                maxValue=10.0
+            ),
+            "The minimum value a pixel needs to have in order to be seen as part of an object that could be detected."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterNumber(
                 "Minimum pixel count",
                 self.tr("Minimum pixel count"),
                 QgsProcessingParameterNumber.Integer,
-                2,
-            )
+                defaultValue=2,
+                minValue=1
+            ),
+            "The minimum number of connected pixels, each greater than threshold, that an object must have to be detected."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterBoolean(
                 "Connectivity: use 8 instead of 4",
                 self.tr("Connectivity: use 8 instead of 4"),
                 defaultValue=False,
-            )
+            ),
+            "The connectivity method that used to determine the amount of pixels that make up an object. In case of 4-connectivity each pixel is only considered as connected to the pixels that touch along the edges, making each pixel connected to 4 other pixels. With 8-connectivity pixels that touch along the corneers are also considered as connected, making each pixel connected to 8 other pixels."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterNumber(
                 "Number of deblending thresholds",
                 self.tr("Number of deblending thresholds"),
                 QgsProcessingParameterNumber.Integer,
                 500,
-            )
+            ),
+            "The number of multi-thresholding levels to use for deblending."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterNumber(
                 "Minimum contrast for object separation",
                 self.tr("Minimum contrast for object separation"),
                 QgsProcessingParameterNumber.Double,
-                0.00005,
-            )
+                defaultValue=0.05,
+                minValue=0.0,
+                maxValue=10.0
+            ),
+            "The minimum difference between two peaks for them to be seen as different objects."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterBoolean(
                 "Output: polygons",
                 self.tr("Output: polygons"),
                 defaultValue=True,
-            )
+            ),
+            "Determines whether or not a vector layer with the polygons of the detected plants will be generated. The polygons will be the smallest possible polygon that contains the plant."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterBoolean(
                 "Output: points",
                 self.tr("Output: points"),
                 defaultValue=True,
-            )
+            ),
+            "Determines whether or not a vector layer with the points of the detected plants will be generated. The points will be the center of each plant."
         )
 
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterBoolean(
-                "Output: parameter summary",
-                self.tr("Output: parameter summary"),
+                "Output: summary",
+                self.tr("Output: summary"),
                 defaultValue=True,
-            )
+            ),
+            "Determines whether or not a json file with a summary of the parameters used for the analysis and the number of detected plants (per layer) will be generated."
         )
         
-        self.addParameter(
+        self.add_param(
             QgsProcessingParameterFolderDestination(
-                "FOLDER_PATH",
+                "Folder path",
                 "Folder location"
-            )
+            ),
+            "The folder where the output files will be saved."
         )
 
     def processAlgorithm(self, parameters, context, feedback):
-        folder_path = self.parameterAsString(parameters, 'FOLDER_PATH', context)
+        folder_path = self.parameterAsString(parameters, 'Folder path', context)
         polygondfs = []
         pointdfs = []
         objectcount = {}
@@ -331,7 +354,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
             "Input Parameters": parameters,
         }
 
-        if parameters["Output: parameter summary"]:
+        if parameters["Output: summary"]:
             output_file = folder_path + "/summary.json"
             with open(output_file, "w") as file:
                 json.dump(data, file, indent=4)
