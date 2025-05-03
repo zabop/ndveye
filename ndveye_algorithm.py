@@ -35,21 +35,14 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import (
     QgsProcessing,
     QgsProcessingAlgorithm,
-    QgsProcessingParameterRasterLayer,
     QgsProcessingParameterMultipleLayers,
-    QgsProcessingParameterFile,
     QgsProcessingParameterNumber,
     QgsProcessingParameterBoolean,
-    QgsPointXY,
-    QgsGeometry,
     QgsProject,
     QgsVectorLayer,
-    QgsFeature,
     QgsSimpleLineSymbolLayer,
     QgsSimpleMarkerSymbolLayer,
-    QgsProcessingParameterFolderDestination,
-    QgsCoordinateTransform, 
-    QgsCoordinateReferenceSystem
+    QgsProcessingParameterFolderDestination
 )
 import os
 import shapely
@@ -195,14 +188,6 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         )
         
         self.addParameter(
-            QgsProcessingParameterBoolean(
-                "EPSG:3857",
-                self.tr("Use EPSG:3857 (Web Mercator) instead of using the CRS from the input layers."),
-                defaultValue=False,
-            )
-        )
-        
-        self.addParameter(
             QgsProcessingParameterFolderDestination(
                 "FOLDER_PATH",
                 "Folder location"
@@ -295,7 +280,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
             
             group = os.path.basename(inputFile).replace(".tif", "")
 
-            geom = gpd.GeoSeries(shapes).set_crs(3857) if parameters["EPSG:3857"] else gpd.GeoSeries(shapes).set_crs(layer_crs_id)
+            geom = gpd.GeoSeries(shapes).set_crs(layer_crs_id)
             gdf = gpd.GeoDataFrame(geometry=geom)
             gdf["group"] = group
             polygondfs.append(gdf)
@@ -306,22 +291,12 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
             pointdfs.append(gdf)
 
         if parameters["Output: polygons"]:
-            
-            if parameters["EPSG:3857"]:
-                gpd.GeoDataFrame(pd.concat(polygondfs)).set_crs(3857).to_file(
-                    folder_path + "/polygons.gpkg",
-                    driver="GPKG",
-                    layer="polygons",
-                    engine="pyogrio",
-                )
-            else: 
-                gpd.GeoDataFrame(pd.concat(polygondfs)).set_crs(layer_crs_id).to_file(
-                    folder_path + "/polygons.gpkg",
-                    driver="GPKG",
-                    layer="polygons",
-                    engine="pyogrio",
-                )
-            
+            gpd.GeoDataFrame(pd.concat(polygondfs)).set_crs(layer_crs_id).to_file(
+                folder_path + "/polygons.gpkg",
+                driver="GPKG",
+                layer="polygons",
+                engine="pyogrio",
+            )
             polygonLayer = QgsProject.instance().addMapLayer(
                 QgsVectorLayer(
                     folder_path + "/polygons.gpkg", "resultPolygons", "ogr"
@@ -332,23 +307,13 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
             )
 
         if parameters["Output: points"]:
-            if parameters["EPSG:3857"]:
-                gpd.GeoSeries(pd.concat([e.geometry for e in pointdfs])).set_crs(3857).to_file(
-                    folder_path + "/points.gpkg",
-                    driver="GPKG",
-                    layer="points",
-                    engine="pyogrio",
-                    index=False,
-                )
-            else:
-                gpd.GeoSeries(pd.concat([e.geometry for e in pointdfs])).set_crs(layer_crs_id).to_file(
-                    folder_path + "/points.gpkg",
-                    driver="GPKG",
-                    layer="points",
-                    engine="pyogrio",
-                    index=False,
-                )
-            
+            gpd.GeoSeries(pd.concat([e.geometry for e in pointdfs])).set_crs(layer_crs_id).to_file(
+                folder_path + "/points.gpkg",
+                driver="GPKG",
+                layer="points",
+                engine="pyogrio",
+                index=False,
+            )
             pointsLayer = QgsProject.instance().addMapLayer(
                 QgsVectorLayer(
                     folder_path + "/points.gpkg", "resultPoints", "ogr"
