@@ -55,9 +55,9 @@ class ndveyeProvider(QgsProcessingProvider):
         Loads all algorithms belonging to this provider.
         """
         self.addAlgorithm(ndveyeAlgorithm())
+        self.addAlgorithm(ndveyeAlgorithm2())
         # add additional algorithms here
         # self.addAlgorithm(MyOtherAlgorithm())
-        self.addAlgorithm(ndveyeAlgorithm2())
 
     def id(self):
         """
@@ -65,7 +65,7 @@ class ndveyeProvider(QgsProcessingProvider):
         string should be a unique, short, character only string, eg "qgis" or
         "gdal". This string should not be localised.
         """
-        return 'ndveye'
+        return 'NDVeye'
 
     def name(self):
         """
@@ -74,7 +74,7 @@ class ndveyeProvider(QgsProcessingProvider):
 
         This string should be short (e.g. "Lastools") and localised.
         """
-        return self.tr('ndveye')
+        return self.tr('NDVeye')
 
     def icon(self):
         """

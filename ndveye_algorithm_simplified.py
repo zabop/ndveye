@@ -411,7 +411,7 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return "ndveye (with biological inputs)"
+        return "NDVeye (with biological inputs)"
 
     def displayName(self):
         """

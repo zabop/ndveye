@@ -78,7 +78,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
     def add_param(self, param, help_text=None):
         if help_text:
             param.setHelp(help_text)
-        self.add_param(param)
+        self.addParameter(param)
 
     def initAlgorithm(self, config):
         """
@@ -369,7 +369,7 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return "ndveye"
+        return "NDVeye"
 
     def displayName(self):
         """
