@@ -105,7 +105,11 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 minValue=0.0,
                 maxValue=0.9
             ),
-            "This value will be subtracted from each pixel to make the true features stand out more. In case of a brighter background (for example due to more weeds) a higher background offset will improve the algorithms' results."
+            """
+            This value will be subtracted from each pixel to make the true features stand out more. 
+            In case of a brighter background (for example due to more weeds) a higher background offset will improve the algorithms' results. 
+            Keep in mind that the background offset will be subtracted from the value of each pixel, meaning that a higher background offset will require a lower threshold.
+            """
         )
 
         self.add_param(
@@ -115,7 +119,11 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 QgsProcessingParameterNumber.Double,
                 1.0,
             ),
-            "The full-width at half-maximum (FWHM) of the 2D circular Gaussian kernel."
+            """
+            The full-width at half-maximum (FWHM) of the 2D circular Gaussian kernel.
+            This will determine the amount of smoothing that will happen, with a higher value increasing the smoothing and a smaller one decreasing it.
+            If smaller plants are not being detected consider lowering the kernel FWHM, as a less wide kernel will erase less small objects.
+            """
         )
 
         self.add_param(
@@ -125,7 +133,9 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 QgsProcessingParameterNumber.Integer,
                 7,
             ),
-            "The size of the kernel along each axis, this must be an odd value."
+            """
+            The size of the kernel along each axis, this must be an odd value.
+            """
         )
 
         self.add_param(
@@ -137,7 +147,10 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 minValue=0.0,
                 maxValue=10.0
             ),
-            "The minimum value a pixel needs to have in order to be seen as part of an object that could be detected."
+            """
+            The minimum value a pixel needs to have in order to be seen as part of an object that could be detected. Keep in mind that the background offset will be subtracted from the value of each pixel, meaning that a higher background offset will require a lower threshold. 
+            To estimate, check the value of one of the object you mean to detect, subtract the background offset and use that as a starting point.
+            """
         )
 
         self.add_param(
@@ -148,7 +161,9 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 defaultValue=2,
                 minValue=1
             ),
-            "The minimum number of connected pixels, each greater than threshold, that an object must have to be detected."
+            """
+            The minimum number of connected pixels, each greater than threshold, that an object must have to be detected.
+            """
         )
 
         self.add_param(
@@ -157,7 +172,10 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 self.tr("Connectivity: use 8 instead of 4"),
                 defaultValue=False,
             ),
-            "The connectivity method that used to determine the amount of pixels that make up an object. In case of 4-connectivity each pixel is only considered as connected to the pixels that touch along the edges, making each pixel connected to 4 other pixels. With 8-connectivity pixels that touch along the corneers are also considered as connected, making each pixel connected to 8 other pixels."
+            """
+            The connectivity method that is used to determine the amount of pixels that make up an object. In case of 4-connectivity each pixel is only considered as connected to the pixels that touch along the edges, making each pixel connected to 4 other pixels. With 8-connectivity pixels that touch along the corneers are also considered as connected, making each pixel connected to 8 other pixels.
+            By default 4-connectivity is used, if the algorithms' predictions exclude parts of the plant that are more elongated or distant from the core of the plant, consider using 8-connectivity instead.
+            """
         )
 
         self.add_param(
@@ -167,7 +185,9 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 QgsProcessingParameterNumber.Integer,
                 500,
             ),
-            "The number of multi-thresholding levels to use for deblending."
+            """
+            The number of multi-thresholding levels to use for deblending. A higher number of thresholds will allow for more peaks to be deblended into separate objects.
+            """
         )
 
         self.add_param(
@@ -179,7 +199,10 @@ class ndveyeAlgorithm(QgsProcessingAlgorithm):
                 minValue=0.0,
                 maxValue=10.0
             ),
-            "The minimum difference between two peaks for them to be seen as different objects."
+            """
+            Determines the level of deblending that will happen. This value needs to be between zero and one, with zero causing every peak to be seen as a separate object and one not allowing any deblending causing every connected object to be seen as only one object.
+            If the algoritmh has separated singular plants into several object, increase this value. If the algorithm has connected several plant into a singular object, decrease this value.
+            """
         )
 
         self.add_param(

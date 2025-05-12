@@ -98,7 +98,9 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
                 self.tr("Input raster(s)"),
                 QgsProcessing.TypeRaster,
             ),
-            "The layer that will be analysed and where the plants will be counted by the algorithm. Consider preprocessing these layers by using spectral indeces, such as NDVI."
+            """
+            The layer that will be analysed and where the plants will be counted by the algorithm. Consider preprocessing these layers by using spectral indeces, such as NDVI.
+            """
         )
 
         self.add_param(
@@ -110,7 +112,10 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
                 minValue=1.0,
                 maxValue=100.0
             ),
-            "The estimated minimum diameter of a plant that could be detected by the algorithm."
+            """
+            The estimated minimum diameter of a plant that could be detected by the algorithm.
+            To estimate use the Measure Line tool in QGIS to measure one of the smaller plants.
+            """
         )
 
         self.add_param(
@@ -122,7 +127,11 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
                 minValue=1.0,
                 maxValue=100.0
             ),
-            "The estimated maximum diameter of a plant that could be detected by the algorithm. To allow the polygons to be generated correctly a distance of at least the maximum plant diameter should be kept between the plants and the borders of the layer."
+            """
+            The estimated maximum diameter of a plant that should be detected by the algorithm. 
+            Keep in mind that to allow the polygons to be generated correctly a distance of at least the maximum plant diameter should be kept between the plants and the borders of the layer.
+            To estimate use the Measure Line tool in QGIS to measure one of the bigger plants.
+            """
         )
 
         self.add_param(
@@ -134,7 +143,11 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
                 minValue=0.0,
                 maxValue=0.9
             ),
-            "This value will be subtracted from each pixel to make the true features stand out more. In case of a brighter background (for example due to more weeds) a higher background offset will improve the algorithms' results."
+            """
+            This value will be subtracted from each pixel to make the true features stand out more. 
+            In case of a brighter background (for example due to more weeds) a higher background offset will improve the algorithms' results. 
+            Keep in mind that the background offset will be subtracted from the value of each pixel, meaning that a higher background offset will require a lower threshold.
+            """
         )
 
         self.add_param(
@@ -146,7 +159,10 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
                 minValue=0.0,
                 maxValue=10.0
             ),
-            "The minimum value a pixel needs to have in order to be seen as part of an object that could be detected."
+            """
+            The minimum value a pixel needs to have in order to be seen as part of an object that could be detected. Keep in mind that the background offset will be subtracted from the value of each pixel, meaning that a higher background offset will require a lower threshold. 
+            To estimate, check the value of one of the object you mean to detect, subtract the background offset and use that as a starting point.
+            """
         )
 
         self.add_param(
@@ -155,7 +171,10 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
                 self.tr("Connectivity: use 8 instead of 4"),
                 defaultValue=False,
             ),
-            "The connectivity method that used to determine the amount of pixels that make up an object. In case of 4-connectivity each pixel is only considered as connected to the pixels that touch along the edges, making each pixel connected to 4 other pixels. With 8-connectivity pixels that touch along the corneers are also considered as connected, making each pixel connected to 8 other pixels."
+            """
+            The connectivity method that is used to determine the amount of pixels that make up an object. In case of 4-connectivity each pixel is only considered as connected to the pixels that touch along the edges, making each pixel connected to 4 other pixels. With 8-connectivity pixels that touch along the corneers are also considered as connected, making each pixel connected to 8 other pixels.
+            By default 4-connectivity is used, if the algorithms' predictions exclude parts of the plant that are more elongated or distant from the core of the plant, consider using 8-connectivity instead.
+            """
         )
 
         self.add_param(
@@ -165,9 +184,12 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
                 QgsProcessingParameterNumber.Double,
                 defaultValue=0.05,
                 minValue=0.0,
-                maxValue=10.0
+                maxValue=1.0
             ),
-            "The minimum difference between two peaks for them to be seen as different objects. If there is a lot of distance between the plants, this value can be higher, if a lot of plants are touching this value should be lower."
+            """
+            Determines the level of deblending that will happen. This value needs to be between zero and one, with zero causing every peak to be seen as a separate object and one not allowing any deblending causing every connected object to be seen as only one object.
+            If the algoritmh has separated singular plants into several object, increase this value. If the algorithm has connected several plant into a singular object, decrease this value.
+            """
         )
 
         self.add_param(
@@ -217,11 +239,11 @@ class ndveyeAlgorithm2(QgsProcessingAlgorithm):
             min_pixels = min_cm / res_cm
             max_pixels = max_cm / res_cm
 
-            kernel_fwhm = min_pixels * 0.8
-            kernel_size = 2 * int(max_pixels) + 1
+            kernel_fwhm = min_pixels
+            kernel_size = int(max_pixels) + 1 if int(max_pixels)%2 == 0 else int(max_pixels)
 
             npixels = int(np.pi * (min_pixels/2)**2)
-            nlevels = int(50 * (max_pixels/min_pixels))
+            nlevels = int(20 * (max_pixels/min_pixels))
 
             return {"kernel_fwhm": kernel_fwhm, "kernel_size": kernel_size, "npixels": npixels, "nlevels": nlevels, "res_cm": res_cm}
 
